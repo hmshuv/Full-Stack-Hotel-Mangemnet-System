@@ -1,0 +1,55 @@
+// prisma/schema.prisma
+datasource db {
+  provider = "mysql"  // or "postgresql" if using PostgreSQL
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Room {
+  id          Int       @id @default(autoincrement())
+  number      String
+  type        String
+  price       Float
+  description String?
+  status      String
+  bookings    Booking[]
+}
+
+model Booking {
+  id        Int       @id @default(autoincrement())
+  checkIn   DateTime
+  checkOut  DateTime
+  status    String
+  guestId   Int
+  roomId    Int
+  guest     Guest     @relation(fields: [guestId], references: [id])
+  room      Room      @relation(fields: [roomId], references: [id])
+  invoice   Invoice?
+}
+
+model Guest {
+  id       Int       @id @default(autoincrement())
+  name     String
+  email    String    @unique
+  phone    String?
+  bookings Booking[]
+}
+
+model Staff {
+  id       Int       @id @default(autoincrement())
+  name     String
+  email    String    @unique
+  role     String
+  password String    // Store a hashed password
+}
+
+model Invoice {
+  id        Int      @id @default(autoincrement())
+  bookingId Int      @unique
+  amount    Float
+  status    String
+  booking   Booking  @relation(fields: [bookingId], references: [id])
+}
